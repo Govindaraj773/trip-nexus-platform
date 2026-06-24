@@ -16,15 +16,15 @@ const Tour = require('./../models/tourModel');
 //   next();
 // };
 
-exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: 'Fail',
-      message: 'missing name or price',
-    });
-  }
-  next();
-};
+// exports.checkBody = (req, res, next) => {
+//   if (!req.body.name || !req.body.price) {
+//     return res.status(400).json({
+//       status: 'Fail',
+//       message: 'missing name or price',
+//     });
+//   }
+//   next();
+// };
 
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
@@ -58,26 +58,47 @@ exports.getTour = (req, res) => {
   });
 };
 
-exports.createTour = (req, res) => {
-  // console.log(req.body);
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
+exports.createTour = async (req, res) => {
+  try {
+    // const newTour = new Tour();
+    // newTour.save();
+    const newTour = await Tour.create(req.body);
 
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour,
-        },
-      });
-    },
-  );
-  // res.send('Done Successfully!');
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid data sent!',
+    });
+  }
 };
+
+// below code is commented out because we are now using MongoDB to store data instead of a JSON file. The code below was used to create a new tour and save it to the JSON file. Now, we will use Mongoose to create a new tour and save it to the MongoDB database.
+// exports.createTour = (req, res) => {
+//   // console.log(req.body);
+//   const newId = tours[tours.length - 1].id + 1;
+//   const newTour = Object.assign({ id: newId }, req.body);
+
+//   tours.push(newTour);
+//   fs.writeFile(
+//     `${__dirname}/dev-data/data/tours-simple.json`,
+//     JSON.stringify(tours),
+//     (err) => {
+//       res.status(201).json({
+//         status: 'success',
+//         data: {
+//           tour: newTour,
+//         },
+//       });
+//     },
+//   );
+//   // res.send('Done Successfully!');
+// };
 
 exports.updateTour = (req, res) => {
   // if (req.params.id * 1 > tours.length) {
